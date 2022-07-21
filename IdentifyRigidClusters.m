@@ -1,8 +1,8 @@
-function label=IdentifyRigidClusters(N,cutoff,MutuallyPairs)
+function label=IdentifyRigidClusters(N,cutoff,MutuallyPairs,IsHinge,AdjacencyMatrix)
 global R;
 label=cell(N,1); %every point may belongs to several rigid clusters
 mp=cell(N,1); %mp(u)={v|v and u is mutually rigid}
-% get mp(i)
+%% get mp(i)
 for i=1:N
     mp{i}=[];
     label{i}=[];
@@ -12,13 +12,16 @@ for i=1:N
         end
     end
 end
-% get label{i}
+%% get label{i}
 R=0;
 for A=1:N
     mA=mp{A};
     nA=length(mA);
     for i=1:nA
         B=mA(i);
+        if check(label{A},label{B})
+            continue;
+        end
         mAB=intersect(mA,mp{B});
         nAB=length(mAB);
         %disp(mAB);
@@ -48,20 +51,32 @@ for A=1:N
     end
 end
 end
+%% check a,b,c same cluster
 function ok=check(c,a,b)
 ok=0;
-for k=1:length(c)
-    z=c(k);
-    for i=1:length(a)
-        x=a(i);
-        if z==x
-            for j=1:length(b)
-                y=b(j);
-                %disp([x,y,z]);
-                if z==y
-                    ok=1;
-                    return;
+if nargin==3
+    for k=1:length(c)
+        z=c(k);
+        for i=1:length(a)
+            x=a(i);
+            if z==x
+                for j=1:length(b)
+                    y=b(j);
+                    %disp([x,y,z]);
+                    if z==y
+                        ok=1;
+                        return;
+                    end
                 end
+            end
+        end
+    end
+elseif nargin==2
+    for z=c
+        for x=a
+            if z==x
+                ok=1;
+                return;
             end
         end
     end
